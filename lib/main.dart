@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'package:qoxaria/core/logger.dart';
 import 'package:qoxaria/core/models/version.dart';
+import 'package:qoxaria/features/auth/services/microsoft_auth.dart';
 import 'package:qoxaria/features/forge/widgets/forge_installation_widget.dart';
 
 
@@ -134,6 +135,11 @@ class MyHomePage extends StatelessWidget {
                 ],
               );
             }
+          ),
+
+          ElevatedButton(
+            onPressed: () => MicrosoftAuth().authenticate(),
+            child: Text('Login with Microsoft'),
           ),
         ],
       ),
