@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -34,9 +35,21 @@ class ForgeInstallerException implements Exception {
 class ForgeInstallationService {
   static const forgeBaseFilename = 'forge-{minecraft_version}-{forge_version}-installer.jar';
   static const forgeBaseUrl = 'https://maven.minecraftforge.net/net/minecraftforge/forge/{minecraft_version}-{forge_version}';
-  String? filePath;
+  final QoxariaVersion version;
+  String? _filePath;
 
-  String _getVersionFormattedString(QoxariaVersion version, String baseString) {
+  ForgeInstallationService({required this.version});
+
+  Future<String> _getFilePath() async {
+    if (_filePath == null) {
+      final filename = _getVersionFormattedString(forgeBaseFilename);
+      final directory = await _getTempDirectory();
+      _filePath = '${directory.path}/$filename';
+    }
+    return _filePath!;
+  }
+
+  String _getVersionFormattedString(String baseString) {
     return
       baseString
       .replaceAll('{minecraft_version}', '${version.minecraft}')
@@ -54,27 +67,28 @@ class ForgeInstallationService {
     return directory;
   }
 
-  Future<void> download(QoxariaVersion version) async {
-    final filename = _getVersionFormattedString(version, forgeBaseFilename);
-    final url = '${_getVersionFormattedString(version, forgeBaseUrl)}/$filename';
+  String _getDownloadUrl() {
+    final filename = _getVersionFormattedString(forgeBaseFilename);
+    return '${_getVersionFormattedString(forgeBaseUrl)}/$filename';
+  }
 
+  Future<void> download() async {
+    final url = _getDownloadUrl();
     final response = await http.get(Uri.parse(url));
     if (response.statusCode != 200) {
       logger.severe('Failed to download Forge installer from $url');
       throw RequestException(url: url, statusCode: response.statusCode, response: response);
     }
 
-    final directory = await _getTempDirectory();
-
-    filePath = '${directory.path}/$filename';
-    final file = File(filePath!);
+    final filePath = await _getFilePath();
+    final file = File(filePath);
     await file.writeAsBytes(response.bodyBytes);
 
     logger.info('Forge installer downloaded to: $filePath');
   }
 
   Future<void> cleanup() async {
-    final file = File(filePath!);
+    final file = File(await _getFilePath());
     if (file.existsSync()) {
       file.deleteSync();
     }
@@ -90,8 +104,8 @@ class ForgeInstallationService {
     }
   }
 
-  Future<void> install() async {
-    final installerFilePath = filePath!;
+  Future<void> install([Function(String)? onLog, Function(String)? onError]) async {
+    final installerFilePath = await _getFilePath();
     final file = File(installerFilePath);
     if (!file.existsSync()) {
       logger.severe("Can't install Forge. Installer file missing at $installerFilePath. Try downloading.");
@@ -100,21 +114,21 @@ class ForgeInstallationService {
 
     final process = await Process.start(
       'java',
-      ['-jar', installerFilePath, '--installClient', _getMinecraftPath()],
-      mode: ProcessStartMode.inheritStdio,
+      ['-jar', installerFilePath, '--installClient', _getMinecraftDataPath()],
+      mode: ProcessStartMode.normal,
     );
 
-    // process.stdout.transform(utf8.decoder).listen((data) {
-    //   addLog(data);
+    process.stdout.transform(utf8.decoder).listen((data) {
+      if (onLog != null) {
+        onLog(data);
+      }
+    });
 
-    //   if (data.contains('Successfully installed client into launcher.')) {
-    //     updateProgress(100);
-    //   }
-    // });
-
-    // process.stderr.listen((data) {
-    //   print(String.fromCharCodes(data));
-    // });
+    process.stderr.transform(utf8.decoder).listen((data) {
+      if (onError != null) {
+        onError(data);
+      }
+    });
 
     int exitCode = await process.exitCode;
 
@@ -126,12 +140,21 @@ class ForgeInstallationService {
     }
   }
 
-  String _getMinecraftPath() {
+  Future<void> fullInstall([Function(String)? onLog, Function(String)? onError]) async {
+    if (!File(await _getFilePath()).existsSync()) {
+      logger.fine('Forge Installer not found. Downloading...');
+      await download();
+    }
+    await install(onLog, onError);
+    await cleanup();
+  }
+
+  String _getMinecraftDataPath() {
     String minecraftPath;
     if (Platform.isWindows) {
-      minecraftPath = '${Platform.environment['USERPROFILE']}\\AppData\\Local\\Programs\\Qoxaria';
+      minecraftPath = '${Platform.environment['USERPROFILE']}\\AppData\\Roaming\\Qoxaria';
     } else if (Platform.isMacOS || Platform.isLinux) {
-      minecraftPath = '${Platform.environment['HOME']}/Qoxaria';
+      minecraftPath = '${Platform.environment['HOME']}/.local/share/Qoxaria';
     } else {
       throw UnsupportedError('Platform ${Platform.operatingSystem} not supported.');
     }

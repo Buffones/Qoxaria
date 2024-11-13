@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -37,16 +36,10 @@ class MyApp extends StatelessWidget {
 
 
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
   late Future<QoxariaVersion> futureVersion;
 
   MyAppState() {
     futureVersion = fetchVersion();
-  }
-
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
   }
 
   Future<QoxariaVersion> fetchVersion() async {
@@ -71,54 +64,76 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
-          const Text('A random idea:'),
-          Text(appState.current.asLowerCase),
-
-          ElevatedButton(
-            onPressed: () {
-              appState.getNext();
-            },
-            child: const Text('Next'),
+          Text(
+            'Qoxaria',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            )
           ),
-
           FutureBuilder<QoxariaVersion>(
             future: appState.futureVersion,
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return const Text('Fetching Qoxaria versions...');
-              }
-              return Container(constraints: BoxConstraints(maxHeight: 200), child: ForgeInstallationWidget(version: snapshot.data!));
-            }
-          ),
-
-          FutureBuilder<QoxariaVersion>(
-            future: appState.futureVersion,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Minecraft: '
-                      '${snapshot.data!.minecraft.major}.'
-                      '${snapshot.data!.minecraft.minor}.'
-                      '${snapshot.data!.minecraft.patch}'
-                    ),
-                    Text(
-                      'Forge: '
-                      '${snapshot.data!.forge.major}.'
-                      '${snapshot.data!.forge.minor}.'
-                      '${snapshot.data!.forge.patch}',
-                    ),
-                    Text('Modpack: ${snapshot.data!.modpack}'),
-                  ],
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Fetching version from the server...'),
+                      CircularProgressIndicator(),
+                    ],
+                  ),
                 );
-              } else if (snapshot.hasError) {
-                return Text('${snapshot.error}');
               }
 
-              return const CircularProgressIndicator();
-            },
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        textAlign: TextAlign.center,
+                        'Error fetching version from the server.\nApp not available.',
+                      ),
+                    ],
+                  )
+                );
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 650,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        alignment: WrapAlignment.spaceBetween,
+                        spacing: 10.0,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Minecraft: ${snapshot.data!.minecraft}'),
+                              Text('Forge: ${snapshot.data!.forge}'),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Modpack: ${snapshot.data!.modpack}'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  ForgeInstallationWidget(version: snapshot.data!),
+                ],
+              );
+            }
           ),
         ],
       ),
