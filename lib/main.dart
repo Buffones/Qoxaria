@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -140,6 +141,30 @@ class MyHomePage extends StatelessWidget {
           ElevatedButton(
             onPressed: () => MicrosoftAuth().authenticate(),
             child: Text('Login with Microsoft'),
+          ),
+
+          ElevatedButton(
+            onPressed: () async {
+              final process = await Process.start(
+                'cmd.exe',
+                ['/c', 
+                'C:\\XboxGames\\Minecraft Launcher\\Content\\Minecraft.exe',
+                ],
+                // [],
+                // ['-jar', installerFilePath, '--installClient', _getMinecraftDataPath()],
+                mode: ProcessStartMode.normal,
+              );
+              process.stdout.transform(utf8.decoder).listen((data) {
+                print(data);
+              });
+
+              process.stderr.transform(utf8.decoder).listen((data) {
+                print(data);
+              });
+              int exitCode = await process.exitCode;
+              print(exitCode);
+            },
+            child: Text('Open Launcher'),
           ),
         ],
       ),
