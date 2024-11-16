@@ -71,12 +71,11 @@ class ModpackInstallationService {
     final zipFile = File(zipPath);
     final bytes = await zipFile.readAsBytes();
     final archive = ZipDecoder().decodeBytes(bytes);
-    logger.info(zipPath);
-    logger.info(Platform.pathSeparator);
-    logger.info(zipPath.split(Platform.pathSeparator).last);
     final prefixLength = archive.first.name.length;
     for (final file in archive) {
       final filename = file.name.substring(prefixLength);
+      if (filename == '') continue;
+
       final filePath = '$outputDir/$filename';
 
       if (file.isFile) {
@@ -87,7 +86,7 @@ class ModpackInstallationService {
         File(filePath)
           ..createSync(recursive: true)
           ..writeAsBytesSync(file.content as List<int>);
-      } else {
+      } else if (file.name != Platform.pathSeparator) {
         final directory = Directory(filePath);
         if (directory.existsSync()) {
           directory.deleteSync(recursive: true);

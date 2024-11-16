@@ -24,6 +24,7 @@ class ModpackInstallationWidget extends StatefulWidget {
 class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
   late final ModpackInstallationService _service;
   String? _folderPath;
+  bool _installing = false;
 
 
   @override
@@ -45,7 +46,7 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
         child: Text('Pick a Folder'),
       ),
       ElevatedButton(
-        onPressed: (_folderPath != null) ? () async => await _install() : null,
+        onPressed: (_folderPath != null && !_installing) ? () async => await _install() : null,
         child: Text('Install Modpack'),
       ),
     ]);
@@ -57,6 +58,14 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
   }
 
   Future<void> _install() async {
+    setState(() => _installing = true);
+    toastification.show(
+        type: ToastificationType.info,
+        style: ToastificationStyle.flatColored,
+        autoCloseDuration: const Duration(seconds: 7),
+        title: const Text('Installation started'),
+        description: Text('Qoxaria Modpack is being downloaded and installed in $_folderPath'),
+      );
     try {
       await _service.download(_folderPath!);
       toastification.show(
@@ -66,6 +75,7 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
         title: const Text('Qoxaria Modpack installed.'),
         description: Text('Modpack installed successfully in $_folderPath'),
       );
+      setState(() => _folderPath = null);
     } catch (e) {
       toastification.show(
         type: ToastificationType.error,
@@ -74,6 +84,8 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
         title: const Text('Qoxaria Modpack installation failed'),
         description: Text("Couldn't install the modpack.\n$e"),
       );
+    } finally {
+      setState(() => _installing = false);
     }
   }
 }
