@@ -3,10 +3,9 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
 
-import 'package:path_provider/path_provider.dart';
 import 'package:qoxaria/core/logger.dart';
 import 'package:qoxaria/core/models/version.dart';
-import 'package:http/http.dart' as http;
+import 'package:qoxaria/utils/files.dart';
 
 /* 
   TODO: Refactor a little bit for cleaner code!
@@ -24,50 +23,37 @@ class ModpackInstallationService {
 
   ModpackInstallationService({required this.version});
 
-  Future<void> download(String folder) async {
-    final http.Response response = await http.get(Uri.parse('$zipballUrl/${version.modpack}'));
-
-    if (response.statusCode != 200) {
-      logger.severe(
-          'Failed to download modpack, statusCode: ${response.statusCode}');
-      throw Exception('Failed to download modpack');
-    }
-
+  Future<String> download() async {
     final filePath = await _getFilePath();
-    final file = File(filePath);
-    await file.writeAsBytes(response.bodyBytes);
-
+    try {
+      downloadFile('$zipballUrl/${version.modpack}', filePath);
+    } on DownloadFailedException catch(e) {
+      logger.severe('Failed to download modpack, statusCode: ${e.response.statusCode}');
+      rethrow;
+    }
     logger.fine('Modpack downloaded to: $filePath');
-
-    unzipFile(
-      filePath, folder
-    );
+    return filePath;
   }
 
-  Future<void> install() async {}
+  Future<void> install(filePath, outputDir) async {
+    await unzipFile(filePath, outputDir, filesToExclude: filesToExclude, isPrefixed: true, shouldDelete: true);
+    logger.fine('Modpack extracted to: $outputDir');
+  }
+
+  Future<void> fullInstall(String outputDir) async {
+    final filePath = await download();
+    await install(filePath, outputDir);
+  }
 
   Future<String> _getFilePath() async {
     if (_filePath == null) {
-      final directory = await _getTempDirectory();
+      final directory = await getTempDirectory();
       _filePath = '${directory.path}/qoxaria-modpack.zip';
     }
     return _filePath!;
   }
 
-  Future<Directory> _getTempDirectory() async {
-    Directory directory;
-    try {
-      directory = await getTemporaryDirectory();
-    } on MissingPlatformDirectoryException catch (e) {
-      directory = Directory('${await getApplicationDocumentsDirectory()}/tmp');
-      logger.info(
-          "Couldn't find temporary directory: $e\nCreated $directory to be used instead.");
-    }
-    return directory;
-  }
-
-  void unzipFile(String zipPath, String outputDir) async {
-
+  Future<void> __unzipFile(String zipPath, String outputDir) async {
     final zipFile = File(zipPath);
     final bytes = await zipFile.readAsBytes();
     final archive = ZipDecoder().decodeBytes(bytes);

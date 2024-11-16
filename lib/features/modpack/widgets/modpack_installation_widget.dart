@@ -67,7 +67,7 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
         description: Text('Qoxaria Modpack is being downloaded and installed in $_folderPath'),
       );
     try {
-      await _service.download(_folderPath!);
+      await _service.fullInstall(_folderPath!);
       toastification.show(
         type: ToastificationType.success,
         style: ToastificationStyle.flatColored,
