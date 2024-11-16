@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:qoxaria/core/models/version.dart';
+import 'package:qoxaria/features/launcher/widgets/launcher_widget.dart';
 import 'package:qoxaria/features/modpack/widgets/modpack_installation_widget.dart';
 import 'package:qoxaria/features/modpack/widgets/version_widget.dart';
 
@@ -19,6 +20,7 @@ class LandingScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Image.asset('assets/logo.png', height: 75),
+          LauncherWidget(),
           ModpackInstallationWidget(version: version),
           VersionWidget(version: version),
         ]
