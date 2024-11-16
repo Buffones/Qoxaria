@@ -20,8 +20,8 @@ class LandingScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Image.asset('assets/logo.png', height: 75),
-          LauncherWidget(),
-          ModpackInstallationWidget(version: version),
+          Padding(padding: EdgeInsets.all(8), child: LauncherWidget()),
+          Padding(padding: EdgeInsets.all(8), child: ModpackInstallationWidget(version: version)),
           VersionWidget(version: version),
         ]
       ),

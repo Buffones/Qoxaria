@@ -4,7 +4,10 @@ import 'dart:io';
 import 'package:qoxaria/core/logger.dart';
 
 abstract class LauncherService {
+  String get name;
   String getPath();
+  Future<void> download(String outputFilename);
+  Future<void> install();
 
   bool isInstalled() {
     return File(getPath()).existsSync();
@@ -27,5 +30,4 @@ abstract class LauncherService {
     int exitCode = await process.exitCode;
     logger.fine('Minecraft Launcher was successfully started with exit code $exitCode');
   }
-
 }

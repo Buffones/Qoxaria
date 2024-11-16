@@ -36,18 +36,22 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      Text('Modpack Installation'),
-      if (_folderPath != null)
-        Text('Selected folder: $_folderPath'),
-      if (_folderPath == null)
-        Text('No folder selected'),
+      Text('Modpack Installation', style: TextStyle(fontSize: 18)),
       ElevatedButton(
         onPressed: _pickFolder,
         child: Text('Pick a Folder'),
       ),
-      ElevatedButton(
-        onPressed: (_folderPath != null && !_installing) ? () async => await _install() : null,
-        child: Text('Install Modpack'),
+      if (_folderPath != null)
+        Text('Selected folder: $_folderPath', style: TextStyle(fontSize: 14)),
+      if (_folderPath == null)
+        Text('No folder selected', style: TextStyle(fontSize: 14)),
+      
+      Padding(
+        padding: EdgeInsets.only(top: 8),
+        child: ElevatedButton(
+          onPressed: (_folderPath != null && !_installing) ? () async => await _install() : null,
+          child: Text('Install Modpack'),
+        ),
       ),
     ]);
   }
@@ -60,12 +64,12 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
   Future<void> _install() async {
     setState(() => _installing = true);
     toastification.show(
-        type: ToastificationType.info,
-        style: ToastificationStyle.flatColored,
-        autoCloseDuration: const Duration(seconds: 7),
-        title: const Text('Installation started'),
-        description: Text('Qoxaria Modpack is being downloaded and installed in $_folderPath'),
-      );
+      type: ToastificationType.info,
+      style: ToastificationStyle.flatColored,
+      autoCloseDuration: const Duration(seconds: 7),
+      title: const Text('Installation started'),
+      description: Text('Qoxaria Modpack is being downloaded and installed in $_folderPath'),
+    );
     try {
       await _service.fullInstall(_folderPath!);
       toastification.show(
