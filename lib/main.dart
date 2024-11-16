@@ -62,6 +62,97 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
+
+class LoadingPage extends StatelessWidget {
+  final String text;
+  const LoadingPage({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(text),
+          const CircularProgressIndicator(),
+        ],
+      ),
+    );
+  }
+}
+
+
+class ErrorPage extends StatelessWidget {
+  final String text;
+  const ErrorPage({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          textAlign: TextAlign.center,
+          text,
+        ),
+      ],
+    ));
+  }
+}
+
+
+class LandingPage extends StatelessWidget {
+  final QoxariaVersion version;
+
+  const LandingPage({super.key, required this.version});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 650,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 10.0,
+              children: [
+                Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                        'Minecraft: ${version.minecraft}'),
+                    Text('Forge: ${version.forge}'),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                        'Modpack: ${version.modpack}'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        ModpackInstallationWidget(version: version),
+
+        //  ForgeInstallationWidget(version: snapshot.data!),
+      ],
+    );
+  }
+}
+
+
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
@@ -88,70 +179,14 @@ class MyHomePage extends StatelessWidget {
                     future: appState.futureVersion,
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
-                        return const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('Fetching version from the server...'),
-                              CircularProgressIndicator(),
-                            ],
-                          ),
-                        );
+                        return const LoadingPage(text: 'Fetching version from the server...');
                       }
 
                       if (snapshot.hasError) {
-                        return const Center(
-                            child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              textAlign: TextAlign.center,
-                              'Error fetching version from the server.\nApp not available.',
-                            ),
-                          ],
-                        ));
+                        return const ErrorPage(text: 'Error fetching version from the server.\nApp not available.');
                       }
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 650,
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                alignment: WrapAlignment.spaceBetween,
-                                spacing: 10.0,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                          'Minecraft: ${snapshot.data!.minecraft}'),
-                                      Text('Forge: ${snapshot.data!.forge}'),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                          'Modpack: ${snapshot.data!.modpack}'),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          ModpackInstallationWidget(version: snapshot.data!),
-
-                          //  ForgeInstallationWidget(version: snapshot.data!),
-                        ],
-                      );
+                      return LandingPage(version: snapshot.data!);
                     }),
                 /*           ElevatedButton(
                   onPressed: () => MicrosoftAuth().authenticate(),
