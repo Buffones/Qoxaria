@@ -9,12 +9,14 @@ import 'package:qoxaria/core/models/version.dart';
 import 'package:http/http.dart' as http;
 
 /* 
-  TODO: Delete config, kubejs and mods folders before extracting the modpack
-  TODO: Delete zip file after extracting
+  TODO: Refactor a little bit for cleaner code!
  */
 
+
+const filesToExclude = ['.gitignore', 'README.md'];
 const zipballUrl =
-    "https://api.github.com/repos/n-ull/qoxaria-modpack/zipball/ ";
+    "https://api.github.com/repos/n-ull/qoxaria-modpack/zipball";
+
 
 class ModpackInstallationService {
   final QoxariaVersion version;
@@ -22,11 +24,8 @@ class ModpackInstallationService {
 
   ModpackInstallationService({required this.version});
 
-  Future<void> download() async {
-    final http.Response response = await http.get(Uri.parse(zipballUrl));
-
-    final minecraftPath =
-        '${Platform.environment['USERPROFILE']}\\AppData\\Roaming\\.minecraftata';
+  Future<void> download(String folder) async {
+    final http.Response response = await http.get(Uri.parse('$zipballUrl/${version.modpack}'));
 
     if (response.statusCode != 200) {
       logger.severe(
@@ -41,7 +40,7 @@ class ModpackInstallationService {
     logger.fine('Modpack downloaded to: $filePath');
 
     unzipFile(
-      filePath, minecraftPath
+      filePath, folder
     );
   }
 
@@ -68,28 +67,41 @@ class ModpackInstallationService {
   }
 
   void unzipFile(String zipPath, String outputDir) async {
-    // Read the Zip file as bytes
-    final bytes = await File(zipPath).readAsBytes();
 
-    // Decode the Zip file
+    final zipFile = File(zipPath);
+    final bytes = await zipFile.readAsBytes();
     final archive = ZipDecoder().decodeBytes(bytes);
-
-    // Extract each file
+    logger.info(zipPath);
+    logger.info(Platform.pathSeparator);
+    logger.info(zipPath.split(Platform.pathSeparator).last);
+    final prefixLength = archive.first.name.length;
     for (final file in archive) {
-      final filename = file.name;
+      final filename = file.name.substring(prefixLength);
       final filePath = '$outputDir/$filename';
 
       if (file.isFile) {
-        // Write the file content to disk
+        logger.fine(file.name.split('/').last);
+        if (filesToExclude.contains(file.name.split('/').last)) {
+          continue;
+        }
         File(filePath)
           ..createSync(recursive: true)
           ..writeAsBytesSync(file.content as List<int>);
       } else {
-        // Create the directory
+        final directory = Directory(filePath);
+        if (directory.existsSync()) {
+          directory.deleteSync(recursive: true);
+        }
         await Directory(filePath).create(recursive: true);
       }
     }
 
     logger.fine('Modpack extracted to: $outputDir');
+
+    try {
+      zipFile.deleteSync();
+    } on FileSystemException {
+      logger.warning("Couldn't delete modpack zip file. Might have been deleted already!");
+    }
   }
 }

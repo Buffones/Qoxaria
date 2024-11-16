@@ -14,6 +14,7 @@ import 'package:qoxaria/core/screens/landing_screen.dart';
 import 'package:qoxaria/core/screens/loading_screen.dart';
 import 'package:qoxaria/features/auth/services/microsoft_auth.dart';
 import 'package:qoxaria/features/forge/widgets/forge_installation_widget.dart';
+import 'package:toastification/toastification.dart';
 
 
 void main() {
@@ -29,19 +30,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Qoxaria',
-        theme: ThemeData(
-          textTheme: TextTheme(
-              bodyMedium: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600)),
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+      child: ToastificationWrapper(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Qoxaria',
+          theme: ThemeData(
+            textTheme: TextTheme(
+                bodyMedium: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600)),
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+          ),
+          home: const MyHomePage(),
         ),
-        home: const MyHomePage(),
       ),
     );
   }
