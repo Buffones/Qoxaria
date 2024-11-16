@@ -47,7 +47,7 @@ class LauncherWidgetState extends State<LauncherWidget> {
       onPressed = _installing[service.name]! ? null : () async => await _install(service);
       text = Text('Install ${service.name}');
     }
-    return ElevatedButton(onPressed: onPressed, child: text);
+    return FilledButton(onPressed: onPressed, child: text);
   }
 
   Future<void> _install(LauncherService service) async {

@@ -37,7 +37,7 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
   Widget build(BuildContext context) {
     return Column(children: [
       Text('Modpack Installation', style: TextStyle(fontSize: 18)),
-      ElevatedButton(
+      FilledButton(
         onPressed: _pickFolder,
         child: Text('Pick a Folder'),
       ),
@@ -48,7 +48,7 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
       
       Padding(
         padding: EdgeInsets.only(top: 8),
-        child: ElevatedButton(
+        child: FilledButton(
           onPressed: (_folderPath != null && !_installing) ? () async => await _install() : null,
           child: Text('Install Modpack'),
         ),

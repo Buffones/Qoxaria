@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
                     fontSize: 16,
                     fontWeight: FontWeight.w600)),
             useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
           ),
           home: const MyHomePage(),
         ),
