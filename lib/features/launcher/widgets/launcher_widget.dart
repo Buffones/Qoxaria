@@ -32,7 +32,7 @@ class LauncherWidgetState extends State<LauncherWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      _buildButton(_minecraftService),
+      // _buildButton(_minecraftService),
       Padding(padding: EdgeInsets.only(top: 8), child: _buildButton(_multiMcService)),
     ]);
   }
