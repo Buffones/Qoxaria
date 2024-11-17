@@ -21,7 +21,7 @@ class ModpackInstallationService {
   Future<String> download() async {
     final filePath = await _getFilePath();
     try {
-      downloadFile('$zipballUrl/${version.modpack}', filePath);
+      await downloadFile('$zipballUrl/${version.modpack}', filePath);
     } on DownloadFailedException catch(e) {
       logger.severe('Failed to download modpack, statusCode: ${e.response.statusCode}');
       rethrow;
