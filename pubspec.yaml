@@ -48,6 +48,6 @@ msix_config:
   publisher_display_name: Buffones
   identity_name: Buffones.Qoxaria
   publisher: CN=55B1E00F-E444-4FCE-BB2C-7C607F87C39A
-  msix_version: 0.0.2.1
+  msix_version: 0.0.2.0
   logo_path: assets\icon.ico
   capabilities: internetClient
