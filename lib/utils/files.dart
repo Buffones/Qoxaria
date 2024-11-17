@@ -44,6 +44,7 @@ Future<void> unzipFile(
   String outputDir,
   {
     List<String> filesToExclude = const [],
+    List<String> prefixesToExclude = const [],
     bool isPrefixed = false,
     bool shouldDelete = false,
   }
@@ -58,20 +59,28 @@ Future<void> unzipFile(
     // skip it to avoid deleting the whole outputDir
     if (filename == '') continue;
 
+    final isProtectedFile = prefixesToExclude.any((p) => filename.startsWith(p));
     final outputPath = '$outputDir/$filename';
     if (file.isFile) {
       if (filesToExclude.contains(file.name.split('/').last)) continue;
 
-      File(outputPath)
+      final outputFile = File(outputPath);
+      if (outputFile.existsSync() && isProtectedFile) continue;
+      outputFile
         ..createSync(recursive: true)
         ..writeAsBytesSync(file.content as List<int>);
     } else {
+      logger.info(filename);
+      logger.info(isProtectedFile);
       final directory = Directory(outputPath);
+
       // Delete existing folders so all their content is changed with those from the zip
-      if (directory.existsSync()) {
+      if (directory.existsSync() && !isProtectedFile) {
         directory.deleteSync(recursive: true);
       }
-      await Directory(outputPath).create(recursive: true);
+      if (!directory.existsSync()) {
+        await Directory(outputPath).create(recursive: true);
+      }
     }
   }
 

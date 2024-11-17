@@ -10,6 +10,9 @@ import 'package:qoxaria/utils/files.dart';
 const filesToExclude = ['.gitignore', 'README.md'];
 const zipballUrl =
     "https://api.github.com/repos/n-ull/qoxaria-modpack/zipball";
+// We want to download config folder if not present, but avoid overwriting
+// any existing files from there, so we don't mess with users' settings.
+const protectedFolders = ['config/'];
 
 
 class ModpackInstallationService {
@@ -31,7 +34,14 @@ class ModpackInstallationService {
   }
 
   Future<void> install(filePath, outputDir) async {
-    await unzipFile(filePath, outputDir, filesToExclude: filesToExclude, isPrefixed: true, shouldDelete: true);
+    await unzipFile(
+      filePath,
+      outputDir,
+      filesToExclude: filesToExclude,
+      isPrefixed: true,
+      shouldDelete: true,
+      prefixesToExclude: protectedFolders,
+    );
     logger.fine('Modpack extracted to: $outputDir');
   }
 
