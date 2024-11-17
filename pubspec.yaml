@@ -42,3 +42,12 @@ flutter:
 
   assets:
     - assets/
+
+msix_config:
+  display_name: Qoxaria
+  publisher_display_name: Buffones
+  identity_name: Buffones.Qoxaria
+  publisher: CN=55B1E00F-E444-4FCE-BB2C-7C607F87C39A
+  msix_version: 1.0.0.0
+  logo_path: assets\icon.ico
+  capabilities: internetClient
