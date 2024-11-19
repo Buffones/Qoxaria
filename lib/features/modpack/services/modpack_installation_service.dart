@@ -34,7 +34,7 @@ class ModpackInstallationService {
   }
 
   Future<void> install(filePath, outputDir) async {
-    await unzipFile(
+    await uncompressFile(
       filePath,
       outputDir,
       filesToExclude: filesToExclude,

@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:qoxaria/core/logger.dart';
 import 'package:toastification/toastification.dart';
 
 
@@ -75,6 +76,7 @@ class MultiMCLauncherWidgetState extends State<MultiMCLauncherWidget> {
       );
       setState(() => _isInstalled = true);
     } catch (e) {
+      logger.warning("Couldn't install MultiMC.\n$e");
       toastification.show(
         type: ToastificationType.error,
         style: ToastificationStyle.flatColored,
