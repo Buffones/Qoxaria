@@ -38,9 +38,14 @@ class LandingScreen extends StatelessWidget {
         children: [
           Image.asset('assets/logo.png', height: 75),
           Padding(padding: const EdgeInsets.all(8), child: child),
-          if (appState.configuration.workflow != Workflow.unknown)
-            ChangeWorkflowWidget(),
-          VersionWidget(version: version),
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              if (appState.configuration.workflow != Workflow.unknown)
+                WorkflowWidget(),
+              VersionWidget(version: version),
+            ]
+          ),
         ]
       ),
     );
@@ -80,22 +85,35 @@ class WorkflowChoosingWidget extends StatelessWidget {
 }
 
 
-class ChangeWorkflowWidget extends StatelessWidget {
-  const ChangeWorkflowWidget({super.key});
+class WorkflowWidget extends StatelessWidget {
+  const WorkflowWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<MyAppState>(context);
-    return Column(children: [
-      const Text('Workflow'),
-      Text(
-        'Current: ${appState.configuration.workflow.name}',
-        style: TextStyle(fontSize: 12),
-      ),
-      FilledButton(
-        onPressed: () => appState.updateWorkflow(Workflow.unknown),
-        child: const Text('Change'),
-      ),
-    ]);
+    return Column(
+      children: [
+        const Text('Workflow'),
+        Text(
+          'Current: ${_getWorkflowName(appState.configuration.workflow)}',
+          style: TextStyle(fontSize: 12),
+        ),
+        FilledButton(
+          onPressed: () => appState.updateWorkflow(Workflow.unknown),
+          child: const Text('Change'),
+        ),
+      ]
+    );
+  }
+
+  String _getWorkflowName(Workflow workflow) {
+    switch (workflow) {
+      case Workflow.multiMC:
+        return 'Multi MC';
+      case Workflow.modpackOnly:
+        return 'Modpack only';
+      default:
+        return 'Unknown';
+    }
   }
 }
