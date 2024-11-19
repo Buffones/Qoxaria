@@ -5,8 +5,8 @@ import 'package:qoxaria/core/models/configuration.dart';
 
 import 'package:qoxaria/core/models/version.dart';
 import 'package:qoxaria/features/launcher/widgets/multi_mc_launcher_widget.dart';
+import 'package:qoxaria/features/modpack/widgets/modpack_installation_widget.dart';
 import 'package:qoxaria/features/modpack/widgets/version_widget.dart';
-import 'package:qoxaria/features/modpack/widgets/modpack_widget.dart';
 import 'package:qoxaria/main.dart';
 
 
@@ -23,10 +23,10 @@ class LandingScreen extends StatelessWidget {
       case Workflow.multiMC:
         child = Column(children: [
           MultiMCLauncherWidget(),
-          ModpackWidget(version: version),
+          ModpackInstallationWidget(version: version, useMultiMCDir: true),
         ]);
       case Workflow.modpackOnly:
-        child = ModpackWidget(version: version);
+        child = ModpackInstallationWidget(version: version);
       default:
         child = WorkflowChoosingWidget();
     }
