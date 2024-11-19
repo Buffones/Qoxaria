@@ -14,12 +14,14 @@ import 'package:toastification/toastification.dart';
 
 class ModpackInstallationWidget extends StatefulWidget {
   final QoxariaVersion version;
+  final Function()? onInstall;
 
-  const ModpackInstallationWidget({super.key, required this.version});
+  const ModpackInstallationWidget({super.key, required this.version, this.onInstall});
 
   @override
   ModpackInstallationWidgetState createState() => ModpackInstallationWidgetState();
 }
+
 
 class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
   late final ModpackInstallationService _service;
@@ -79,6 +81,7 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
         title: const Text('Qoxaria Modpack installed.'),
         description: Text('Modpack installed successfully in $_folderPath'),
       );
+      if (widget.onInstall != null) widget.onInstall!();
       setState(() => _folderPath = null);
     } catch (e) {
       toastification.show(

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 
-import 'package:qoxaria/core/models/configuration.dart';
 import 'package:qoxaria/features/launcher/services/multimc_launcher_service.dart';
 import 'package:qoxaria/main.dart';
 
@@ -25,8 +24,8 @@ class MultiMCLauncherWidgetState extends State<MultiMCLauncherWidget> {
   @override
   void initState() {
     super.initState();
-    // final appState = Provider.of<MyAppState>(context);
-    _service = MultiMCLauncherService(configuration: MultiMCConfiguration.fromDefaults());
+    final appState = Provider.of<MyAppState>(context, listen: false);
+    _service = MultiMCLauncherService(configuration: appState.configuration.multiMC);
     _installing = false;
     _isInstalled = _service.isInstalled();
   }

@@ -54,10 +54,10 @@ class MultiMCConfiguration {
 
 
 class Configuration {
-  final String modpackVersion;
+  String modpackVersion;
   final MultiMCConfiguration multiMC;
 
-  const Configuration({required this.modpackVersion, required this.multiMC});
+  Configuration({required this.modpackVersion, required this.multiMC});
 
   factory Configuration.fromJson(Map<String, dynamic> json) {
     return Configuration(

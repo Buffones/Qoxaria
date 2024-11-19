@@ -93,6 +93,11 @@ class MyAppState extends ChangeNotifier {
     configuration.multiMC.path = newPath;
     notifyListeners();
   }
+
+  void updateVersion(String newVersion) {
+    configuration.modpackVersion = newVersion;
+    notifyListeners();
+  }
 }
 
 
@@ -149,6 +154,6 @@ class AppLifecycleObserver with WindowListener {
     }
     final appState = Provider.of<MyAppState>(context, listen: false);
     logger.info("Saving state...");
-    ConfigurationRepository().store(appState.configuration);
+    await ConfigurationRepository().store(appState.configuration);
   }
 }
