@@ -88,6 +88,11 @@ class MyAppState extends ChangeNotifier {
       throw Exception('Failed to load version.');
     }
   }
+
+  void updateMultiMCPath(String newPath) {
+    configuration.multiMC.path = newPath;
+    notifyListeners();
+  }
 }
 
 
@@ -126,13 +131,12 @@ class MyHomePage extends StatelessWidget {
 
 class AppLifecycleObserver with WindowListener {
   AppLifecycleObserver() {
-    print("Calling addListener");
     windowManager.addListener(this);
   }
 
   @override
   Future<bool> onWindowClose() async {
-    print('App is closing!');
+    logger.fine('App is closing!');
     await saveAppState();
     return true;
   }
@@ -145,6 +149,6 @@ class AppLifecycleObserver with WindowListener {
     }
     final appState = Provider.of<MyAppState>(context, listen: false);
     logger.info("Saving state...");
-    logger.fine(appState.configuration.toJson());
+    ConfigurationRepository().store(appState.configuration);
   }
 }

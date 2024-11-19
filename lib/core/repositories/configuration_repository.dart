@@ -28,4 +28,12 @@ class ConfigurationRepository {
       return Configuration.fromDefaults();
     }
   }
+
+  Future<void> store(Configuration configuration) async {
+    try {
+      File(filePath).writeAsString(jsonEncode(configuration.toJson()));
+    } catch (e) {
+      logger.severe("Configurations couldn't be saved in $filePath.");
+    }
+  }
 }

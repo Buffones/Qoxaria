@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:qoxaria/utils/files.dart';
 
 class MultiMCConfiguration {
-  final String path;
-  final String javaPath;
-  final int minMemory;
-  final int maxMemory;
+  String path;
+  String javaPath;
+  int minMemory;
+  int maxMemory;
 
-  const MultiMCConfiguration({
+  MultiMCConfiguration({
     required this.path,
     required this.javaPath,
     required this.minMemory,

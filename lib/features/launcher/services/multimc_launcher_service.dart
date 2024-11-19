@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:qoxaria/core/logger.dart';
+import 'package:qoxaria/core/models/configuration.dart';
 import 'package:qoxaria/features/launcher/services/launcher_service_mixin.dart';
 import 'package:qoxaria/utils/files.dart';
 
@@ -14,6 +15,11 @@ const multiMcUrls = {
 class MultiMCLauncherService extends LauncherService {
   @override
   final name = 'MultiMC';
+
+  final MultiMCConfiguration configuration;
+
+  MultiMCLauncherService({required this.configuration});
+
 
   @override
   Future<void> download(String outputFilename) async {
@@ -37,26 +43,13 @@ class MultiMCLauncherService extends LauncherService {
     final format = Platform.isWindows ? 'zip' : 'tar.gz';
     final downloadFilename = '${directory.path}${Platform.pathSeparator}mmc.$format';
     await download(downloadFilename);
-    await unzipFile(downloadFilename, getInstallationDir(), shouldDelete: true, isPrefixed: true);
-  }
-
-  String getInstallationDir() {
-    if (Platform.isWindows) {
-      return '${Platform.environment['USERPROFILE']}\\AppData\\Local\\Programs\\Qoxaria\\MultiMC';
-    } else if (Platform.isMacOS || Platform.isLinux) {
-      return '${Platform.environment['HOME']}/.local/share/Qoxaria/MultiMC';
-    }
-    throw UnsupportedError('Platform ${Platform.operatingSystem} not supported.');
+    await unzipFile(downloadFilename, configuration.path, shouldDelete: true, isPrefixed: true);
   }
 
   @override
   String getPath() {
-    final directory = getInstallationDir();
-    if (Platform.isWindows) {
-      return '$directory/MultiMC.exe';
-    } else if (Platform.isLinux) {
-      return '$directory/MultiMC';
-    }
-    throw UnsupportedError('Platform ${Platform.operatingSystem} not supported.');
+    String path = '${configuration.path}${Platform.pathSeparator}MultiMC';
+    if (Platform.isWindows) path += '.exe';
+    return path;
   }
 }

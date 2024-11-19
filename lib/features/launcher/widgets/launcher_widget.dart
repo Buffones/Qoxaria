@@ -1,7 +1,11 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:qoxaria/core/models/configuration.dart';
 import 'package:qoxaria/features/launcher/services/launcher_service_mixin.dart';
 import 'package:qoxaria/features/launcher/services/minecraft_launcher_service.dart';
 import 'package:qoxaria/features/launcher/services/multimc_launcher_service.dart';
+import 'package:qoxaria/main.dart';
 import 'package:toastification/toastification.dart';
 
 class LauncherWidget extends StatefulWidget {
@@ -21,8 +25,9 @@ class LauncherWidgetState extends State<LauncherWidget> {
   @override
   void initState() {
     super.initState();
+    // final appState = Provider.of<MyAppState>(context);
     _minecraftService = MinecraftLauncherService();
-    _multiMcService = MultiMCLauncherService();
+    _multiMcService = MultiMCLauncherService(configuration: MultiMCConfiguration.fromDefaults());
     _isInstalled = {
       'MinecraftLauncher': _minecraftService.isInstalled(),
       'MultiMC': _multiMcService.isInstalled()
@@ -31,8 +36,16 @@ class LauncherWidgetState extends State<LauncherWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<MyAppState>(context);
+    final multiMCFolder = appState.configuration.multiMC.path;
     return Column(children: [
       // _buildButton(_minecraftService),
+      Text('MultiMC', style: TextStyle(fontSize: 18)),
+      FilledButton(
+        onPressed: _pickMultiMCFolder,
+        child: Text('Pick a Folder'),
+      ),
+      Text('Selected folder: $multiMCFolder', style: TextStyle(fontSize: 14)),
       Padding(padding: EdgeInsets.only(top: 8), child: _buildButton(_multiMcService)),
     ]);
   }
@@ -42,10 +55,10 @@ class LauncherWidgetState extends State<LauncherWidget> {
     Text text;
     if (_isInstalled[service.name]!) {
       onPressed = service.open;
-      text = Text('Open ${service.name}');
+      text = Text('Open');
     } else {
       onPressed = _installing[service.name]! ? null : () async => await _install(service);
-      text = Text('Install ${service.name}');
+      text = Text('Install');
     }
     return FilledButton(onPressed: onPressed, child: text);
   }
@@ -81,6 +94,18 @@ class LauncherWidgetState extends State<LauncherWidget> {
       );
     } finally {
       setState(() => _installing[service.name] = false);
+    }
+  }
+
+  Future<void> _pickMultiMCFolder() async {
+    if (!mounted) return;
+    final appState = Provider.of<MyAppState>(context, listen: false);
+
+    final folderPath = await FilePicker.platform.getDirectoryPath();
+    if (folderPath != null) {
+      _multiMcService.configuration.path = folderPath;
+      appState.updateMultiMCPath(folderPath);
+      setState(() => _isInstalled['MultiMC'] = _multiMcService.isInstalled());
     }
   }
 }
