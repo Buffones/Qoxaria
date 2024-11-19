@@ -7,12 +7,12 @@ import 'package:qoxaria/utils/files.dart';
  */
 
 
-const filesToExclude = ['.gitignore', 'README.md'];
+const filesToExclude = ['.gitignore', 'README.md', 'xaerominimap-common', 'xaerominimap.txt'];
 const zipballUrl =
     "https://api.github.com/repos/n-ull/qoxaria-modpack/zipball";
 // We want to download config folder if not present, but avoid overwriting
 // any existing files from there, so we don't mess with users' settings.
-const protectedFolders = ['config/'];
+const protectedFolders = [];
 
 
 class ModpackInstallationService {
