@@ -98,6 +98,11 @@ class MyAppState extends ChangeNotifier {
     configuration.modpackVersion = newVersion;
     notifyListeners();
   }
+
+  void updateWorkflow(Workflow newWorkflow) {
+    configuration.workflow = newWorkflow;
+    notifyListeners();
+  }
 }
 
 
