@@ -12,7 +12,7 @@ const zipballUrl =
     "https://api.github.com/repos/n-ull/qoxaria-modpack/zipball";
 // We want to download config folder if not present, but avoid overwriting
 // any existing files from there, so we don't mess with users' settings.
-const protectedFolders = [];
+const List<String> protectedFolders = ['config/'];
 
 
 class ModpackInstallationService {
