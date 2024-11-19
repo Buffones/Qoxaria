@@ -2,6 +2,10 @@ import 'dart:io';
 
 import 'package:qoxaria/utils/files.dart';
 
+
+enum Workflow { unknown, modpackOnly, multiMC }
+
+
 class MultiMCConfiguration {
   String path;
   String javaPath;
@@ -55,14 +59,16 @@ class MultiMCConfiguration {
 
 class Configuration {
   String modpackVersion;
+  Workflow workflow;
   final MultiMCConfiguration multiMC;
 
-  Configuration({required this.modpackVersion, required this.multiMC});
+  Configuration({required this.modpackVersion, required this.multiMC, required this.workflow});
 
   factory Configuration.fromJson(Map<String, dynamic> json) {
     return Configuration(
       modpackVersion: json['modpackVersion'],
       multiMC: MultiMCConfiguration.fromJson(json['multiMC']),
+      workflow: _workflowFromString(json['workflow']),
     );
   }
 
@@ -70,6 +76,7 @@ class Configuration {
     return {
       'modpackVersion': modpackVersion,
       'multiMC': multiMC.toJson(),
+      'workflow': workflow.name,
     };
   }
 
@@ -77,6 +84,15 @@ class Configuration {
     return Configuration(
       modpackVersion: '',
       multiMC: MultiMCConfiguration.fromDefaults(),
+      workflow: Workflow.unknown,
     );
+  }
+
+  static Workflow _workflowFromString(String? workflowName) {
+    try {
+      return Workflow.values.firstWhere((w) => w.name == workflowName);
+    } catch (e) {
+      return Workflow.unknown;
+    }
   }
 }

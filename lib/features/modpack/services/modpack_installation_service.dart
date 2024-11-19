@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:qoxaria/core/logger.dart';
 import 'package:qoxaria/core/models/version.dart';
 import 'package:qoxaria/utils/files.dart';
@@ -34,7 +36,7 @@ class ModpackInstallationService {
   }
 
   Future<void> install(filePath, outputDir) async {
-    await unzipFile(
+    await uncompressFile(
       filePath,
       outputDir,
       filesToExclude: filesToExclude,
@@ -43,6 +45,8 @@ class ModpackInstallationService {
       prefixesToExclude: protectedFolders,
     );
     logger.fine('Modpack extracted to: $outputDir');
+    final versionFile = File('$outputDir/.qoxaria-version');
+    versionFile.writeAsStringSync(version.modpack);
   }
 
   Future<void> fullInstall(String outputDir) async {
@@ -56,5 +60,13 @@ class ModpackInstallationService {
       _filePath = '${directory.path}/qoxaria-modpack.zip';
     }
     return _filePath!;
+  }
+
+  String versionFromDir(String modpackDir) {
+    final file = File('$modpackDir/.qoxaria-version');
+    if (!file.existsSync()) {
+      return '';
+    }
+    return file.readAsStringSync().trim();
   }
 }

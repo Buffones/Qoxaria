@@ -43,7 +43,8 @@ class MultiMCLauncherService extends LauncherService {
     final format = Platform.isWindows ? 'zip' : 'tar.gz';
     final downloadFilename = '${directory.path}${Platform.pathSeparator}mmc.$format';
     await download(downloadFilename);
-    await unzipFile(downloadFilename, configuration.path, shouldDelete: true, isPrefixed: true);
+    await uncompressFile(downloadFilename, configuration.path, shouldDelete: true, isPrefixed: true);
+    if (Platform.isLinux) await _makeFileExecutable();
   }
 
   @override
@@ -51,5 +52,16 @@ class MultiMCLauncherService extends LauncherService {
     String path = '${configuration.path}${Platform.pathSeparator}MultiMC';
     if (Platform.isWindows) path += '.exe';
     return path;
+  }
+
+  Future<void> _makeFileExecutable() async {
+    final filePath = getPath();
+    final result = await Process.run('chmod', ['+x', filePath]);
+
+    if (result.exitCode == 0) {
+      logger.fine('File "$filePath" is now executable.');
+    } else {
+      logger.warning('Failed to change file permissions: ${result.stderr}');
+    }
   }
 }

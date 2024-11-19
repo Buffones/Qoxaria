@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:http/http.dart' as http;
@@ -39,8 +40,8 @@ Future<Directory> getTempDirectory() async {
 }
 
 
-Future<void> unzipFile(
-  String zipPath,
+Future<void> uncompressFile(
+  String compressedPath,
   String outputDir,
   {
     List<String> filesToExclude = const [],
@@ -49,9 +50,9 @@ Future<void> unzipFile(
     bool shouldDelete = false,
   }
 ) async {
-  final zipFile = File(zipPath);
+  final zipFile = File(compressedPath);
   final bytes = await zipFile.readAsBytes();
-  final archive = ZipDecoder().decodeBytes(bytes);
+  final archive = _decodeArchiveFromBytes(compressedPath, bytes);
   final prefixLength = isPrefixed ? archive.first.name.length : 0;
   for (final file in archive) {
     final filename = isPrefixed ? file.name.substring(prefixLength) : file.name;
@@ -88,9 +89,19 @@ Future<void> unzipFile(
     try {
       zipFile.deleteSync();
     } on FileSystemException {
-      logger.warning("Couldn't delete zip file: $zipPath. Might have been deleted already!");
+      logger.warning("Couldn't delete zip file: $compressedPath. Might have been deleted already!");
     }
   }
+}
+
+
+Archive _decodeArchiveFromBytes(String filePath,Uint8List bytes) {
+  if (filePath.endsWith('.zip')) {
+    return ZipDecoder().decodeBytes(bytes);
+  } else if (filePath.endsWith('.tar.gz')) {
+    return TarDecoder().decodeBytes(GZipDecoder().decodeBytes(bytes));
+  }
+  throw UnsupportedError("Can't uncompress file $filePath since format is not supported.");
 }
 
 
