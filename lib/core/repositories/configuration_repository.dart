@@ -31,7 +31,9 @@ class ConfigurationRepository {
 
   Future<void> store(Configuration configuration) async {
     try {
-      File(filePath).writeAsString(jsonEncode(configuration.toJson()));
+      final file = File(filePath);
+      await File(filePath).parent.create(recursive: true);
+      await file.writeAsString(jsonEncode(configuration.toJson()));
     } catch (e) {
       logger.severe("Configurations couldn't be saved in $filePath.");
     }
