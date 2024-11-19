@@ -92,3 +92,23 @@ Future<void> unzipFile(
     }
   }
 }
+
+
+String getProgramsDirectory() {
+  if (Platform.isWindows) {
+    return '${Platform.environment['USERPROFILE']}\\AppData\\Local\\Programs';
+  } else if (Platform.isLinux) {
+    return '${Platform.environment['HOME']}/.local/share';
+  }
+  throw UnsupportedError('Platform ${Platform.operatingSystem} not supported.');
+}
+
+
+String getConfigurationsDirectory() {
+  if (Platform.isWindows) {
+    return '${Platform.environment['USERPROFILE']}\\AppData\\Roaming';
+  } else if (Platform.isLinux) {
+    return '${Platform.environment['HOME']}/.config';
+  }
+  throw UnsupportedError('Platform ${Platform.operatingSystem} not supported.');
+}
