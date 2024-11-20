@@ -20,10 +20,9 @@ const _instanceName = 'Qoxaria';
 
 class ModpackInstallationWidget extends StatefulWidget {
   final QoxariaVersion version;
-  final Function()? onInstall;
   final bool useMultiMCDir;
 
-  const ModpackInstallationWidget({super.key, required this.version, this.onInstall, this.useMultiMCDir = false});
+  const ModpackInstallationWidget({super.key, required this.version, this.useMultiMCDir = false});
 
   @override
   ModpackInstallationWidgetState createState() => ModpackInstallationWidgetState();
@@ -97,7 +96,10 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
         title: const Text('Qoxaria Modpack installed.'),
         description: Text('Modpack installed successfully in $_folderPath'),
       );
-      if (widget.onInstall != null) widget.onInstall!();
+      if (mounted) {
+        final appState = Provider.of<MyAppState>(context, listen: false);
+        appState.updateVersion(widget.version.modpack);
+      }
       setState(() => _folderPath = null);
     } catch (e) {
       toastification.show(
@@ -108,14 +110,14 @@ class ModpackInstallationWidgetState extends State<ModpackInstallationWidget> {
         description: Text("Couldn't install the modpack.\n$e"),
       );
     } finally {
-      setState(() => _installing = false);
+      if (mounted) setState(() => _installing = false);
     }
   }
 
   String _getPathForMultiMCVersion() {
     final appState = Provider.of<MyAppState>(context);
     final sep = Platform.pathSeparator;
-    final multiMCFolder = File(appState.configuration.multiMC.path).parent.path;
+    final multiMCFolder = appState.configuration.multiMC.path;
     return '$multiMCFolder${sep}instances$sep$_instanceName$sep.minecraft';
   }
 }

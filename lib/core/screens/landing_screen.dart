@@ -1,6 +1,9 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:qoxaria/core/logger.dart';
 import 'package:qoxaria/core/models/configuration.dart';
 
 import 'package:qoxaria/core/models/version.dart';
@@ -38,6 +41,10 @@ class LandingScreen extends StatelessWidget {
         children: [
           Image.asset('assets/logo.png', height: 75),
           Padding(padding: const EdgeInsets.all(8), child: child),
+          FilledButton(
+            onPressed: () async => await _launch(appState.configuration.multiMC),
+            child: const Text('Launch'),
+          ),
           Stack(
             alignment: Alignment.bottomRight,
             children: [
@@ -49,6 +56,16 @@ class LandingScreen extends StatelessWidget {
         ]
       ),
     );
+  }
+
+  Future<void> _launch(MultiMCConfiguration multiMCConfiguration) async {
+    final process = await Process.start(
+      '${multiMCConfiguration.path}${Platform.pathSeparator}MultiMC.exe',
+      ['--launch', 'Qoxaria', '--server', 'buffones.com'],
+      mode: ProcessStartMode.detachedWithStdio,
+    );
+    int exitCode = await process.exitCode;
+    logger.fine('MultiMC was successfully started with exit code $exitCode');
   }
 }
 

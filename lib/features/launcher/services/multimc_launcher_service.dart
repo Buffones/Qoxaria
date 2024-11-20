@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:qoxaria/core/logger.dart';
 import 'package:qoxaria/core/models/configuration.dart';
 import 'package:qoxaria/features/launcher/services/launcher_service_mixin.dart';
@@ -45,6 +46,7 @@ class MultiMCLauncherService extends LauncherService {
     await download(downloadFilename);
     await uncompressFile(downloadFilename, configuration.path, shouldDelete: true, isPrefixed: true);
     if (Platform.isLinux) await _makeFileExecutable();
+    await setupInstance();
   }
 
   @override
@@ -63,5 +65,20 @@ class MultiMCLauncherService extends LauncherService {
     } else {
       logger.warning('Failed to change file permissions: ${result.stderr}');
     }
+  }
+
+  Future<void> setupInstance() async {
+    final byteData = await rootBundle.load('assets/MultiMC Instance.zip');
+    final bytes = byteData.buffer.asUint8List();
+    final archive = decodeArchiveFromBytes('assets/MultiMC Instance.zip', bytes);
+    for (final file in archive) {
+      // The contents of the zip are within a folder named Qoxaria (which is the instance name)
+      final sep = Platform.pathSeparator;
+      final outputFile = File('${configuration.path}${sep}instances$sep${file.name}');
+      outputFile
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(file.content as List<int>);
+    }
+    logger.fine('Instance correctly set up');
   }
 }
