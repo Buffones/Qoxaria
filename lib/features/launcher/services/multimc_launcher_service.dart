@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:qoxaria/core/logger.dart';
+import 'package:qoxaria/core/models/configuration.dart';
 import 'package:qoxaria/features/launcher/services/launcher_service_mixin.dart';
 import 'package:qoxaria/utils/files.dart';
 
@@ -14,6 +16,11 @@ const multiMcUrls = {
 class MultiMCLauncherService extends LauncherService {
   @override
   final name = 'MultiMC';
+
+  final MultiMCConfiguration configuration;
+
+  MultiMCLauncherService({required this.configuration});
+
 
   @override
   Future<void> download(String outputFilename) async {
@@ -37,26 +44,41 @@ class MultiMCLauncherService extends LauncherService {
     final format = Platform.isWindows ? 'zip' : 'tar.gz';
     final downloadFilename = '${directory.path}${Platform.pathSeparator}mmc.$format';
     await download(downloadFilename);
-    await unzipFile(downloadFilename, getInstallationDir(), shouldDelete: true, isPrefixed: true);
-  }
-
-  String getInstallationDir() {
-    if (Platform.isWindows) {
-      return '${Platform.environment['USERPROFILE']}\\AppData\\Local\\Programs\\Qoxaria\\MultiMC';
-    } else if (Platform.isMacOS || Platform.isLinux) {
-      return '${Platform.environment['HOME']}/.local/share/Qoxaria/MultiMC';
-    }
-    throw UnsupportedError('Platform ${Platform.operatingSystem} not supported.');
+    await uncompressFile(downloadFilename, configuration.path, shouldDelete: true, isPrefixed: true);
+    if (Platform.isLinux) await _makeFileExecutable();
+    await setupInstance();
   }
 
   @override
   String getPath() {
-    final directory = getInstallationDir();
-    if (Platform.isWindows) {
-      return '$directory/MultiMC.exe';
-    } else if (Platform.isLinux) {
-      return '$directory/MultiMC';
+    String path = '${configuration.path}${Platform.pathSeparator}MultiMC';
+    if (Platform.isWindows) path += '.exe';
+    return path;
+  }
+
+  Future<void> _makeFileExecutable() async {
+    final filePath = getPath();
+    final result = await Process.run('chmod', ['+x', filePath]);
+
+    if (result.exitCode == 0) {
+      logger.fine('File "$filePath" is now executable.');
+    } else {
+      logger.warning('Failed to change file permissions: ${result.stderr}');
     }
-    throw UnsupportedError('Platform ${Platform.operatingSystem} not supported.');
+  }
+
+  Future<void> setupInstance() async {
+    final byteData = await rootBundle.load('assets/MultiMC Instance.zip');
+    final bytes = byteData.buffer.asUint8List();
+    final archive = decodeArchiveFromBytes('assets/MultiMC Instance.zip', bytes);
+    for (final file in archive) {
+      // The contents of the zip are within a folder named Qoxaria (which is the instance name)
+      final sep = Platform.pathSeparator;
+      final outputFile = File('${configuration.path}${sep}instances$sep${file.name}');
+      outputFile
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(file.content as List<int>);
+    }
+    logger.fine('Instance correctly set up');
   }
 }
